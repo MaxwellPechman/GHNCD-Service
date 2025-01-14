@@ -1,0 +1,124 @@
+version: "3.6"
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    restart: always
+    ports:
+      - 9870:9870
+      - 9000:9000
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+      - ./scripts:/mnt/python-scripts  # Adjust path to your local scripts
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop.env
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    restart: always
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop.env
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
+    env_file:
+      - ./hadoop.env
+
+  nodemanager:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+    env_file:
+      - ./hadoop.env
+
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: historyserver
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+    volumes:
+      - hadoop_historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ./hadoop.env
+
+  hive-metastore:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-metastore
+    restart: always
+    depends_on:
+      - namenode
+      - datanode
+    environment:
+      HIVE_METASTORE_URI: thrift://hive-metastore:9083
+      SERVICE_PRECONDITION: "namenode:9000 datanode:9864"
+    ports:
+      - 9083:9083
+    volumes:
+      - hive-metastore:/hive/metastore
+
+  hive-server:
+    image: bde2020/hive:2.3.2-postgresql-metastore
+    container_name: hive-server
+    restart: always
+    depends_on:
+      - hive-metastore
+    environment:
+      HIVE_SERVER2_THRIFT_PORT: 10000
+      HIVE_METASTORE_URI: thrift://hive-metastore:9083
+    ports:
+      - 10000:10000
+    network_mode: host
+    volumes:
+      - ./hive-site.xml:/opt/hive/conf/hive-site.xml  # Mount the hive-site.xml
+
+  spark-thriftserver:
+    image: bitnami/spark:3.4
+    container_name: spark-thriftserver
+    restart: always
+    depends_on:
+      - namenode
+      - datanode
+      - hive-metastore
+    environment:
+      - SPARK_MODE=thrift-server
+      - SPARK_LOG_LEVEL=INFO
+      - HADOOP_CONF_DIR=/opt/bitnami/spark/conf/hadoop
+      - SPARK_CLASSPATH=/opt/hive/conf:/opt/hive/lib/*
+    volumes:
+      - ./hive-site.xml:/opt/spark/conf/hive-site.xml  # Mount the hive-site.xml
+      - ./hadoop:/opt/bitnami/spark/conf/hadoop        # HDFS config directory
+    ports:
+      - 10001:10001
+    command:
+      - start-thriftserver.sh
+      - --master
+      - local[*]
+      - --hiveconf
+      - hive.server2.thrift.port=10001
+
+volumes:
+  hadoop_namenode:
+    driver: local
+  hadoop_datanode:
+    driver: local
+  hadoop_historyserver:
+    driver: local
+  hive-metastore:
+    driver: local
+  shared-workspace:
+    driver: local
