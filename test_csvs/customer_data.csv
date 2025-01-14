@@ -1,0 +1,5 @@
+CustomerID,Name,Email,SignupDate,Country
+C001,John Doe,johndoe@example.com,2024-12-15,USA
+C002,Jane Smith,janesmith@example.com,2024-12-18,Canada
+C003,Sam Brown,sambrown@example.com,2024-12-20,UK
+C004,Lisa White,lisawhite@example.com,2024-12-22,Australia
