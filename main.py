@@ -57,7 +57,7 @@ def get_parquet_data(file_name: str):
 
 if __name__ == "__main__":
     config = uvicorn.Config(host="127.0.0.1",
-                            port=6543,
+                            port=8000,
                             log_level="info",
                             app="main:app")
     server = uvicorn.Server(config)

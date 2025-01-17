@@ -1,4 +1,4 @@
-version: "3.6"
+version: "3.8"
 
 services:
   namenode:
@@ -8,13 +8,17 @@ services:
     ports:
       - 9870:9870
       - 9000:9000
+      - 8000:8000
     volumes:
       - hadoop_namenode:/hadoop/dfs/name
-      - ./scripts:/mnt/python-scripts  # Adjust path to your local scripts
+      - /c/Users/maxip/PycharmProjects/ghncd_service:/mnt/ghncd
     environment:
       - CLUSTER_NAME=test
     env_file:
       - ./hadoop.env
+    build:
+      context: .
+      dockerfile: Dockerfile
 
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
@@ -82,9 +86,8 @@ services:
       HIVE_METASTORE_URI: thrift://hive-metastore:9083
     ports:
       - 10000:10000
-    network_mode: host
     volumes:
-      - ./hive-site.xml:/opt/hive/conf/hive-site.xml  # Mount the hive-site.xml
+      - ./hive-site.xml:/opt/hive/conf/hive-site.xml
 
   spark-thriftserver:
     image: bitnami/spark:3.4
@@ -100,8 +103,8 @@ services:
       - HADOOP_CONF_DIR=/opt/bitnami/spark/conf/hadoop
       - SPARK_CLASSPATH=/opt/hive/conf:/opt/hive/lib/*
     volumes:
-      - ./hive-site.xml:/opt/spark/conf/hive-site.xml  # Mount the hive-site.xml
-      - ./hadoop:/opt/bitnami/spark/conf/hadoop        # HDFS config directory
+      - ./hive-site.xml:/opt/spark/conf/hive-site.xml
+      - ./hadoop:/opt/bitnami/spark/conf/hadoop
     ports:
       - 10001:10001
     command:
@@ -119,6 +122,4 @@ volumes:
   hadoop_historyserver:
     driver: local
   hive-metastore:
-    driver: local
-  shared-workspace:
     driver: local
