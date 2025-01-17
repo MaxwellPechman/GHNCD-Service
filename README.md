@@ -25,8 +25,10 @@ Big Data / VBI Projekt
 * TAVG: Durchschnittliche Temperatur (Average Temperature).
 * TMAX: Maximale Temperatur (Maximum Temperature).
 * TMIN: Minimale Temperatur (Minimum Temperature).
-* TOBS: Beobachtete Temperatur (Observed Temperature).
-* Schneemessungen (verschiedene Kategorien von Schneeereignissen):
+* TOBS: Beobachtete Temperatur (Observed Temperature). 
+
+## Schneemessungen (verschiedene Kategorien von Schneeereignissen):
+
 * SN31-SN36, SN51-SN56: Verschiedene Kategorien von Schneetiefe oder -bedingungen. (Spezifische Details können je nach Datensatz und Jahr variieren.)
 * SX31-SX36, SX51-SX56: Spezifische Messungen von Schneeparametern (Details ebenfalls variabel).
 
@@ -54,7 +56,9 @@ Big Data / VBI Projekt
 
 * PSUN: Prozentualer Sonnenschein (Percent of Sunshine).
 * TSUN: Gesamter Sonnenschein (Total Sunshine).
-* Andere:
+
+## **Andere:**
+
 * EVAP: Verdunstung (Evaporation).
 * DAPR: Tage mit Niederschlag.
 * DASF: Tage mit Schneefall.
